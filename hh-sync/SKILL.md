@@ -1,5 +1,5 @@
 ---
-name: hh:sync-skills
+name: hh:sync
 description: Sync hh-series skills to GitHub and inspect for issues. Auto-detects intent — inspect first, then sync. Use when user says "sync skills", "上传skill", "同步到github", "检查skill", or wants to publish/push hh skills.
 ---
 
@@ -61,7 +61,7 @@ Read the first 10 lines of `SKILL.md`. Verify:
 
 #### C2: Name consistency
 The frontmatter `name:` should match the directory name:
-- `hh-sync` directory → `name: hh:sync-skills` (directory uses `-`, name uses `:`)
+- `hh-sync` directory → `name: hh:sync` (directory uses `-`, name uses `:`)
 - `hh:deploy` directory → `name: hh:deploy` (both use `:`)
 - **Rule:** Replace `-` with `:` in directory name, or keep `:` as-is → should equal frontmatter `name`
 
