@@ -122,6 +122,19 @@ If nothing worth persisting, say so and stop.
 - **Update error-log.md**: if new error patterns were discovered and fixed — follow the existing format (现象 → 根因 → 解决 → 修复位置)
 - **Update adr/**: if a significant architectural decision was made
 
+### Step 5: Offer hh-remember (constraint/error harvesting)
+
+After sync is complete, check if the conversation revealed any **constraints or error patterns** that should be persisted:
+
+> 本轮是否发现了需要记住的约束或踩坑经验？如果需要，可以执行 `/hh-remember` 来收割这些内容到 Constraints.md / error-log.md / .claude/rules/。
+
+- Only ask if there are actual constraints or errors worth persisting (not every sync needs it)
+- Don't force it — this is a genuine offer, not a requirement
+- If user says yes → invoke `hh-remember` skill
+- If user says no → move on
+
+Note: hh-remember does NOT reciprocate (it won't suggest hh-runbook). The dependency is one-way.
+
 ---
 
 ## Shared Rules
