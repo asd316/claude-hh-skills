@@ -230,9 +230,36 @@ Color scheme:
 - Bottleneck retry: orange stripe pattern
 - Bottleneck agent: red border
 
-### L3 Detail tables — styling
+### L3: Key Interactions (NOT all turns)
 
-Use Tailwind CDN for table styling. Sortable headers (click to sort). Search input for filtering tool calls by name.
+**MUST filter to only noteworthy turns.** Showing all 150+ turns is useless noise.
+
+**Show only turns where:**
+- User sent a substantive message (user intervention)
+- A `Skill` was called
+- An `Agent` was spawned
+- Code was edited (`Edit`/`Write`)
+- Git operations happened (`git add/commit/push/merge/stash`)
+
+**Filter out** pure exploration turns (only `Read`/`Bash`/`Glob` without edits).
+
+**Group by user intervention blocks**: user said X → Claude responded with Y (sequence of key turns). Each block shows the user message header followed by indented response turns.
+
+**Response turn timestamps**: use `end_ts` (last tool result from `attachment` records), NOT `user_ts`. For non-user turns, `user_ts` is often empty or stale. `end_ts` is the accurate wall-clock time when Claude finished responding.
+
+**Cross-day handling**: when a response turn's date differs from its parent user message, show `MM-DD HH:MM` format. Insert a date separator `<── 2026-06-10 ──>` between turns when the date changes.
+
+### Design Standards (MANDATORY)
+
+- **White background**: `body{background:#fff;color:#1e293b}`
+- **Card style**: `background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0`
+- **User markers**: `background:#fffbeb;border:1px solid #fde68a` — MUST have visible background on white
+- **Tool chips**: use 8-digit hex with transparency for background (`#7c3aed18`), solid color for text. Format: `font-size:10px;padding:2px 8px;border-radius:10px`
+- **Interaction blocks**: left-border color coding — user=amber, skill=purple, agent=blue, edit=emerald, git=orange
+- **Canvas flame chart**: zero external dependencies, pure Canvas API
+- **Phase-to-DOM mapping (P2D)**: `phase_idx → user_turn_idx` for click navigation. Both indices differ — MUST build mapping table, NOT concatenate blindly
+
+### L3: Tool category distribution
 
 ## Phase 4 — Post-Generation
 
