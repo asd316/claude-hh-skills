@@ -183,6 +183,42 @@ if current_block: blocks.append(current_block)
 
 ## 阶段 3 —— 生成 HTML 报告
 
+### ⚠️ 语言强制要求
+
+**HTML 报告中所有面向用户的文字必须是中文。** 包括但不限于：
+
+- 页面标题（`<title>`）
+- L0-L3 所有标题、标签、说明文字
+- 指标卡片标签（"Tool Calls" → "工具调用"）
+- 阶段分类标签（"Skill 调用"、"Agent 实施"等——这些已是中文）
+- 按钮、提示、占位文字
+- LLM 反思文字
+- 用户标记列表标题
+
+**代码变量名、CSS 类名、JS 函数名**可以用英文。但 `<h1>`、`<h2>`、`<p>`、`<span>` 等标签内的文字内容必须是中文。
+
+**必须使用的中文标签对照表（严格遵循）：**
+
+| 英文（禁止） | 中文（必须） |
+|-------------|------------|
+| Execution Trace / Execution Trace Report | 执行追踪报告 |
+| Execution Effectiveness | 执行效能评估 |
+| Key Metrics | 关键指标 |
+| Tool Calls | 工具调用 |
+| Skills | Skill 调用 |
+| Agent Spawns | Agent 生成 |
+| User Interventions | 用户介入 |
+| Key Interactions | 关键交互 |
+| Turn Flame Chart | 对话轮次火焰图 |
+| Tool Category Distribution | 工具分类分布 |
+| Session Duration | 会话时长 |
+| Bottlenecks | 卡点 |
+| LLM Reflection | LLM 反思 |
+| User Messages | 用户对话 |
+| No Skill calls | 本次会话未调用任何 Skill |
+| No Agent spawns | 本次会话未 spawn Agent |
+| All tool calls < 30s | 未检测到卡点 |
+
 ### 输出路径
 
 ```bash
