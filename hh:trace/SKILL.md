@@ -52,12 +52,27 @@ Read the JSONL file line by line. Each line is a JSON object with a `type` field
 | `mode` / `permission-mode` | Session mode changes | `mode`, `permissionMode` |
 | `worktree-state` | Git worktree events | Worktree name, branch |
 
-### Build the event timeline
+### Build the event timeline — GROUP BY CONVERSATION TURNS (CRITICAL)
 
-1. Iterate through all lines, collecting events
-2. For each `assistant` message, extract ALL `tool_use` blocks → these are tool calls
-3. Match each tool call to its result: tool call has `id`, result `attachment` has `parentUuid` matching the assistant's `uuid`
-4. Calculate elapsed time between a tool call and its result (from `attachment.timestamp`)
+**Do NOT create one event per tool call.** The flame chart becomes unreadable with 100+ individual tool call rows.
+
+Instead, group events into **conversation turns**: each `user` message starts a new turn, followed by one or more `assistant` responses with their tool calls.
+
+1. Iterate through all lines
+2. When encountering a `user` type record: close the previous turn, start a new one
+3. When encountering `assistant` records: collect all `tool_use` blocks into the current turn
+4. When encountering `attachment` records: record the timestamp for the current turn's end time
+5. Each turn has: `user_ts`, `user_msg` (first 120 chars), `tool_calls` list, `end_ts`
+
+### Extract user intervention markers (CRITICAL)
+
+Filter turns where the user message is substantive (not empty, not a system skill-load message):
+
+- Skip messages starting with "Base directory for this skill" (skill-load stubs)
+- Skip empty messages (these are continuation turns)
+- Keep turns where `user_msg.strip()` has actual content
+
+These user messages become **user intervention markers** — displayed prominently in L2 as clickable timeline markers that jump to the corresponding turn.
 
 ### Classify tools
 
@@ -122,18 +137,22 @@ mkdir -p "$(dirname "$OUTPUT")"
 │   会话时长 | Tool Call 总数(N 类) | Skill 调用(N 个)     │
 │   Agent 活动(N spawn, M min) | 卡点(N 个) | 交互轮次     │
 ├──────────────────────────────────────────────────────┤
-│ L2: 火焰图 (Canvas, 可展开/折叠)                         │
-│   - 横轴 = 时间, 每行 = 一个 tool call / skill / agent   │
-│   - 颜色按类别: Skill=紫, Agent=蓝, Read=灰,              │
-│     Edit=绿, Bash=青, Task=琥珀, Git=橙                  │
-│   - 宽度 = 耗时                                         │
-│   - 层级: Skill → Agent → tool calls (嵌套展开)          │
-│   - 卡点高亮: 黄(间隔>30s) 橙(重复>3) 红(Agent>2min)     │
+│ L2: 对话轮次火焰图 + 用户标记 (Canvas)                     │
+│   - 左侧：用户对话标记列表（💬），点击跳转到对应轮次           │
+│   - 右侧：火焰图，每行 = 一个对话轮次                         │
+│   - 行宽 = 该轮 tool call 数量（按比例）                     │
+│   - 颜色按轮次主要操作分类：                                   │
+│     Skill调用=紫, Agent实施=蓝, 代码修改=绿,                  │
+│     Git操作=橙, 探索/诊断=灰, 混合操作=青                    │
+│   - 用户消息轮次用 ★ 标记                                    │
+│   - 点击轮次行：展开显示该轮所有 tool call 详情                │
+│   - 卡点高亮: 黄(间隔>30s) 橙(重复>3) 红(Agent>2min)        │
 ├──────────────────────────────────────────────────────┤
-│ L3: 详情 (默认展开: Skill 卡片 + 卡点表; 默认折叠: 原始日志)│
-│   - 每个 Skill: 调用时间、内部 tool 分布、持续时间          │
-│   - 卡点详情: 位置、类型、相关 tool call、建议              │
-│   - 原始事件列表: 可搜索表格 (时间/类型/工具/耗时)          │
+│ L3: 详情                                                │
+│   - Skill 调用卡片 + Agent Spawn 卡片                    │
+│   - Tool 分类分布（按类型统计数量）                        │
+│   - 所有轮次可展开列表（默认前 3 轮展开，其余折叠）          │
+│   - 每个展开轮次显示 tool call 标签云                      │
 └──────────────────────────────────────────────────────┘
 ```
 
@@ -150,22 +169,35 @@ mkdir -p "$(dirname "$OUTPUT")"
    - 如果有更明确的目标描述，可以减少探索级调用
    - 如果指定了 effor 级别，可以提高/降低审查深度
 
-### L2 Flame Chart — implementation
+### L2 Flame Chart — turn-level Canvas rendering (CRITICAL)
+
+**MUST render at conversation turn level, NOT individual tool call level.** 100+ individual tool call rows are unreadable.
 
 Embed a `<script>` block using Canvas API (zero dependencies):
 
 ```javascript
 // Key rendering logic:
-// 1. Parse the trace data (JSON embedded in HTML)
-// 2. Calculate time range and layout rows
-// 3. Draw rectangles colored by category
-// 4. Width = duration proportional to total time
-// 5. Nested: Skill creates a group row, click to expand/collapse child rows
-// 6. Hover tooltip: tool name, duration, input preview
-// 7. Bottleneck highlights: colored borders/stripes
+// 1. Each turn = one horizontal bar
+// 2. Bar width = proportional to tool_count / max_tools_in_any_turn
+// 3. Bar color = dominant operation category for that turn
+// 4. User intervention turns get a ★ star marker on the left
+// 5. Click a bar → scroll to and expand the turn detail in L3
+// 6. Canvas height = turns * (row_height + gap), auto-resize
 ```
 
-The flame chart data is embedded as a JSON blob in the HTML: `<script id="trace-data" type="application/json">...</script>`. The rendering script reads it at page load.
+**Turn phase classification** (determines bar color):
+- Has `Skill` call and no Agent/Edit → "Skill 调用" (purple)
+- Has `Agent` spawn → "Agent 实施" (blue)
+- Has `Edit`/`Write` and no Agent → "代码修改" (green)
+- Has `Bash` with git commands → "Git 操作" (orange)
+- Only `Read`/`Bash` exploration → "探索/诊断" (gray)
+- Mixed or other → "混合操作" (cyan)
+
+**User intervention markers** — MUST be displayed prominently in L2:
+- Left column: scrollable list of user messages with timestamps
+- Each marker is clickable → scrolls to and highlights the corresponding turn in L3
+- Filter out system messages (skill-load stubs: "Base directory for this skill")
+- Show user message preview (first 150 chars)
 
 Color scheme:
 - Skill: `#7c3aed` (purple)
