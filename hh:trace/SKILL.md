@@ -58,11 +58,75 @@ Read the JSONL file line by line. Each line is a JSON object with a `type` field
 
 Instead, group events into **conversation turns**: each `user` message starts a new turn, followed by one or more `assistant` responses with their tool calls.
 
-1. Iterate through all lines
-2. When encountering a `user` type record: close the previous turn, start a new one
-3. When encountering `assistant` records: collect all `tool_use` blocks into the current turn
-4. When encountering `attachment` records: record the timestamp for the current turn's end time
-5. Each turn has: `user_ts`, `user_msg` (first 120 chars), `tool_calls` list, `end_ts`
+**Pseudocode (MUST follow this exactly):**
+
+```python
+turns = []
+current_turn = None
+
+for record in transcript_lines:
+    type = record['type']
+    ts = record.get('timestamp', '')
+    
+    if type == 'user':
+        # Close previous turn, start new one
+        if current_turn: turns.append(current_turn)
+        user_text = extract_text(record['message']['content'])
+        current_turn = {
+            'user_ts': ts,
+            'user_msg': user_text,
+            'end_ts': ts,        # Initialize with user timestamp
+            'tools': [],          # List of tool_use blocks
+        }
+    
+    elif type == 'assistant' and current_turn:
+        # Collect ALL tool_use blocks from this assistant message
+        for block in record['message'].get('content', []):
+            if block.get('type') == 'tool_use':
+                preview = extract_preview(block)
+                current_turn['tools'].append({
+                    'name': block['name'],
+                    'preview': preview,
+                })
+    
+    elif type == 'attachment' and current_turn:
+        # Update end_ts to the LATEST tool result time
+        if ts:
+            current_turn['end_ts'] = ts
+
+if current_turn: turns.append(current_turn)
+```
+
+**After building turns, filter to phases (only turns with tool calls):**
+- `phases = [t for t in turns if t['tools']]` — skip empty turns
+- Each phase keeps: `turn_idx` (index in turns array), `label`, `user_ts`, `end_ts`, `user_msg`, `tool_count`, `skills[]`, `agents[]`, `tools[]`
+
+**Then filter to key_turns for L3 (only noteworthy phases):**
+```python
+key_turns = []
+for p in phases:
+    is_user = p['turn_idx'] in intervention_indices
+    has_skill = len(p['skills']) > 0
+    has_agent = len(p['agents']) > 0
+    has_edit = any(t['name'] in ('Edit','Write') for t in p['tools'])
+    has_git = any('git ' in t.get('preview','').lower() or 'push' in t.get('preview','').lower() 
+                  for t in p['tools'] if t['name'] == 'Bash')
+    if is_user or has_skill or has_agent or has_edit or has_git:
+        key_turns.append(p)
+```
+
+**Finally group key_turns into interaction blocks (user → responses):**
+```python
+blocks = []
+current_block = None
+for kt in key_turns:
+    if kt['turn_idx'] in intervention_indices:
+        if current_block: blocks.append(current_block)
+        current_block = {'user': kt, 'responses': []}
+    elif current_block:
+        current_block['responses'].append(kt)
+if current_block: blocks.append(current_block)
+```
 
 ### Extract user intervention markers (CRITICAL)
 
@@ -181,19 +245,78 @@ mkdir -p "$(dirname "$OUTPUT")"
 
 **MUST render at conversation turn level, NOT individual tool call level.** 100+ individual tool call rows are unreadable.
 
-Embed a `<script>` block using Canvas API (zero dependencies):
+Embed a `<script>` block using Canvas API (zero dependencies).
+
+#### Step A: Build phase-to-DOM mapping (P2D) — MUST INCLUDE
+
+**P2D maps flame chart row index → L3 DOM element ID.** Without it, click navigation is broken for most bars. This is the #1 bug from real-world testing.
+
+Generate the mapping during data preparation (Python), embed as JS constant:
+
+```python
+# After building interaction_blocks, create P2D mapping:
+p2d = {}
+for block in interaction_blocks:
+    start = block['user']['turn_idx']
+    # End = next block's user turn, or last phase index + 1
+    next_starts = [b['user']['turn_idx'] for b in interaction_blocks 
+                   if b['user']['turn_idx'] > start]
+    end = min(next_starts) if next_starts else max_turn_idx + 1
+    for pi in range(start, end):
+        p2d[pi] = start  # Maps EVERY phase index to its parent block's DOM id
+
+# Embed as: const P2D = {json.dumps(p2d)};
+```
+
+#### Step B: Canvas click handler — MUST USE P2D
 
 ```javascript
-// Key rendering logic:
-// 1. Each turn = one horizontal bar
-// 2. Bar width = proportional to tool_count / max_tools_in_any_turn
-// 3. Bar color = dominant operation category for that turn
-// 4. User intervention turns get a ★ star marker on the left
-// 5. Click a bar → scroll to and highlight the corresponding block in L3
-//    **CRITICAL: Build a phase_to_block mapping (phase_idx → block_idx)**
-//    because flame chart phase indices and L3 block IDs differ.
-//    Without this mapping, click navigation silently breaks for most bars.
-// 6. Canvas height = turns * (row_height + gap), auto-resize
+canvas.addEventListener('click', (e) => {
+    const rowIdx = Math.floor((e.clientY - canvas.getBoundingClientRect().top) / (ROW_H + GAP));
+    if (rowIdx >= 0 && rowIdx < activePhases.length) {
+        const phaseIdx = activePhases[rowIdx].i;  // the turn index
+        const domId = P2D[String(phaseIdx)];       // lookup via mapping
+        if (domId !== undefined) {
+            const target = document.getElementById('block-' + domId);
+            if (target) {
+                target.scrollIntoView({behavior:'smooth', block:'center'});
+                target.style.background = '#fef3c7';
+                setTimeout(() => target.style.background = '', 2000);
+            }
+        }
+    }
+});
+```
+
+**DO NOT do `document.getElementById('block-' + phaseIdx)` — that's the bug.** P2D lookup is mandatory.
+
+#### Step C: Canvas rendering loop
+
+```javascript
+let y = 2, prevDate = '';
+activePhases.forEach(p => {
+    const w = Math.max((p.c / maxTools) * (W - 10), 4);
+    // ★ for user intervention turns
+    if (userTurnIndices.has(p.i)) {
+        ctx.fillStyle = '#f59e0b'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('★', 1, y+11);
+    }
+    // Cross-day dashed separator
+    const curDate = (p.e || p.t || '').substring(0, 10);
+    if (prevDate && curDate && curDate !== prevDate) {
+        ctx.strokeStyle = '#e2e8f0'; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(0, y-1); ctx.lineTo(W, y-1); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#94a3b8'; ctx.font = '9px sans-serif'; ctx.fillText(curDate, W-80, y-3);
+        y += 6;
+    }
+    prevDate = curDate;
+    ctx.fillStyle = CLR[p.l] || '#64748b';
+    ctx.fillRect(15, y, Math.min(w, W-15), ROW_H);
+    if (w > 25) {
+        ctx.fillStyle = '#fff'; ctx.font = '8px monospace'; ctx.fillText('#' + p.i, 18, y+11);
+    }
+    y += ROW_H + GAP;
+});
 ```
 
 **Turn phase classification** (determines bar color):
