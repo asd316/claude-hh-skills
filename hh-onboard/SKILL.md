@@ -15,6 +15,7 @@ Two modes, auto-detected by checking if `CLAUDE.md` exists in the project root.
 
 Read these files in parallel:
 - `CLAUDE.md` — project overview, architecture, commands, **rules from repeated mistakes** (if the project has these, they are the highest-priority constraints)
+- `docs/graph/project-graph.json` — architecture knowledge graph, if exists. Shows goals→pipelines→stages→data flow at skeleton level. Use `/hh:understand` to query or update it.
 - `docs/error-log.md` — known errors and root causes (if exists — read this BEFORE touching any code)
 - `docs/context/error-patterns.md` — error taxonomy by category, detection heuristics (if exists)
 - `docs/Context.md` — domain knowledge, terminology (if exists)
@@ -44,7 +45,7 @@ Output a concise summary:
 
 **Known pitfalls:** [from error-log.md if exists — total errors, most recent, most severe category]
 
-**Available skills:** hh:think hh:diagnose hh:experiment hh:visualize hh:schedule hh:undo hh:runbook
+**Available skills:** hh:think hh:diagnose hh:experiment hh:visualize hh:schedule hh:undo hh:runbook hh:understand
 
 What should we work on?
 ```
@@ -64,6 +65,8 @@ What should we work on?
 
 ```
 docs/
+├── graph/
+│   └── README.md
 ├── quick-start/
 │   └── INDEX.md
 ├── handoff/
@@ -110,6 +113,7 @@ docs/
 | 了解业务背景和术语 | `docs/Context.md` |
 | 知道有哪些坑 | `docs/error-log.md` |
 | 知道绝对不能做什么 | `docs/Constraints.md` |
+| 理解项目骨架和数据流 | `docs/graph/` (或 `/hh:understand`) |
 | 看架构决策历史 | `docs/adr/INDEX.md` |
 | 接手上一个 AI 的工作 | `docs/handoff/` |
 | 看/确认 AI 生成的方案 | `docs/visualization/` |

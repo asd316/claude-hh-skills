@@ -19,60 +19,165 @@ Generate single-file, self-contained HTML pages for data exploration. No server,
 All reports go to `docs/visualization/report-{topic}-{YYYYMMDD}.html`.
 After generation, auto-open with `open <file>`.
 
+## Information Architecture (MANDATORY)
+
+The #1 failure mode: **dumping all data onto the page with no hierarchy.** Users open the page, see a wall of numbers and tables, can't find the point, and give up.
+
+Every report MUST follow this structure:
+
+```
+┌─────────────────────────────────────┐
+│ L0: VERDICT (most prominent)        │  ← ONE sentence answer/conclusion
+├─────────────────────────────────────┤
+│ L1: KEY METRICS (≤6 cards)          │  ← Only the metrics that matter
+├─────────────────────────────────────┤
+│ L2: VISUAL OVERVIEW                 │  ← Chart, timeline, or comparison
+├─────────────────────────────────────┤
+│ L3: DETAILS (collapsed by default)  │  ← Full tables, raw data, per-item breakdown
+└─────────────────────────────────────┘
+```
+
+### L0: Verdict (结论先行)
+
+EVERY report MUST have a verdict. This is the first thing the user reads.
+
+```html
+<div class="verdict">
+  <span class="verdict-label">结论</span>
+  <p><!-- ONE sentence that answers "so what?" --></p>
+</div>
+```
+
+Examples:
+- ✅ "本周共采集 847 条消息，FAQ 新增 12 条，系统运行正常"
+- ✅ "Phase 2 去重率 94%，3 个群的 store 文件已更新"
+- ❌ "以下为本周数据汇总" (not a conclusion)
+- ❌ "Report generated on 2026-06-09" (metadata, not a conclusion)
+
+### L1: Key Metrics (关键指标 ≤6 cards)
+
+Show ONLY the metrics that support the verdict. Maximum 6 stat cards — if you have more metrics, pick the top 6.
+
+Each card: number + label + optional trend indicator (↑↓→).
+
+```html
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="value">847</div>
+    <div class="label">本周消息</div>
+  </div>
+  <!-- max 6 cards total -->
+</div>
+```
+
+### L2: Visual Overview
+
+A chart, timeline, Mermaid diagram, or comparison table that shows the big picture. This is the "at a glance" view.
+
+### L3: Details (collapsed)
+
+ALL detailed data goes in `<details>` elements, collapsed by default:
+
+```html
+<details>
+  <summary>按群查看详情 (3 个群)</summary>
+  <!-- table or chart here -->
+</details>
+
+<details>
+  <summary>完整消息列表 (847 条)</summary>
+  <!-- full data table here -->
+</details>
+```
+
+If the user wants to drill in, they click. If not, they see only L0-L2 and are done.
+
+## Anti-Patterns (DO NOT DO)
+
+| ❌ Don't | ✅ Do |
+|----------|------|
+| Wall of stat cards (10+ metrics) | ≤6 cards, pick the important ones |
+| Full data table above the fold | Collapsed in `<details>` |
+| No verdict, just a title | ONE sentence conclusion at top |
+| "以下为数据汇总" as verdict | State what the data MEANS |
+| Show all groups/dimensions equally | Highlight anomalies, show Top N only |
+| Grid of 20 detail cards | Collapse to expandable sections |
+| Metadata as the first heading | Metadata at the bottom, verdict at top |
+
 ## Design Principles
 
-1. **Single file** — all CSS/JS inlined, no dependencies
-2. **Interactive by default** — if data has categories, add filter toggles. If data has time, add date range.
-3. **Minimalist** — clean layout, no heavy frameworks
-4. **Readable** — tables with proper headers, charts where they add value
-5. **Self-documenting** — title, data source, generation date at top
+1. **Verdict first** — conclusion before evidence, always
+2. **Hierarchy** — L0→L1→L2→L3, each layer adds detail
+3. **Single file** — all CSS/JS inlined, no dependencies
+4. **Interactive where it adds value** — filters, toggles, sorting for L3 details
+5. **Minimalist** — clean layout, no heavy frameworks
+6. **Self-documenting** — title, data source, generation date at bottom
+7. **Anomaly-first** — highlight what's unusual, not what's normal
 
 ## Common Report Types
 
 ### Type A: Data Table with Filters
 When user wants to explore a dataset.
 ```
-Features: search, column sort, category toggle checkboxes, row count
+L0: Verdict about what the data shows
+L1: Row count, unique categories, date range (3-4 cards)
+L2: Summary chart or distribution
+L3: Full table with search, sort, filter (collapsed)
 Template: dark header, striped rows, sticky filters
 ```
 
 ### Type B: Comparison Dashboard
 When comparing A vs B (before/after, two approaches, two time periods).
 ```
-Features: side-by-side tables, diff highlighting, summary stats at top
+L0: Verdict about which is better / what changed
+L1: Key diff metrics (3-4 cards with delta)
+L2: Side-by-side summary
+L3: Full comparison table (collapsed)
 ```
 
 ### Type C: Interactive Configuration Viewer
 When user wants to toggle scenarios (e.g. "what if we exclude X from buffer?").
 ```
-Features: checkbox/toggle controls at top, live-updating summary numbers, affected rows highlighted
+L0: Verdict about the impact of toggling
+L1: Affected count, impact %, savings (3-4 cards)
+L2: Toggle controls (prominent, above the fold)
+L3: Full affected rows list (collapsed)
 ```
 
 ### Type D: Timeline / Flow
 When showing processes or time-based data.
 ```
-Features: chronological list, expandable detail sections, status indicators
+L0: Verdict about the timeline (duration, status)
+L1: Start/end, duration, step count, status summary
+L2: Mermaid timeline or Gantt-style overview
+L3: Per-step details (collapsed)
 ```
 
 ## Workflow
 
 ### 1. Understand the Data
 - Read the data source(s) to understand structure and volume
-- Ask user: what questions should this report answer?
+- Identify: what's the ONE thing the user needs to know?
+- That ONE thing = the verdict
 - Decide report type (A/B/C/D)
 
-### 2. Build the HTML
-- Start from the appropriate template pattern
+### 2. Select What Matters
+- What metrics directly support the verdict? → L1 cards (≤6)
+- What visual tells the story best? → L2 overview
+- What raw data might the user want to check? → L3 details (collapsed)
+
+### 3. Build the HTML
+- Start from L0 verdict → L1 cards → L2 visual → L3 details
 - Populate with real data (embed as JSON in `<script>` tag)
-- Add interactivity: at minimum, search + column sort for tables
+- Add interactivity to L3: search, column sort, filters for tables
 - Keep JS simple — vanilla, no frameworks
 
-### 3. Deliver
+### 4. Deliver
 - Save to `docs/visualization/report-{topic}-{YYYYMMDD}.html`
 - Auto-open in browser
-- Tell user: "Report saved to [path]. What adjustments needed?"
+- Tell user: "Report saved to [path]. Verdict: [one-liner]. What adjustments needed?"
 
-### 4. Iterate
+### 5. Iterate
 - User provides feedback → update the same file (or create new version if major change)
 - When confirmed, file stays in `docs/visualization/` for future reference
 
