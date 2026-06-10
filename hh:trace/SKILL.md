@@ -204,6 +204,13 @@ Embed a `<script>` block using Canvas API (zero dependencies):
 - Only `Read`/`Bash` exploration → "探索/诊断" (gray)
 - Mixed or other → "混合操作" (cyan)
 
+**Cross-day handling (CRITICAL)**:
+- Sessions often span multiple days (user pauses, resumes later)
+- `end_ts` is monotonically increasing within same day, but HH:MM:SS display breaks at day boundary (e.g., "06:25 → 03:49" looks like time went backwards)
+- **Must detect date changes**: compare `end_ts.substring(0,10)` between consecutive turns
+- In flame chart: draw dashed separator line at day boundary with date label
+- In L3 responses: show `MM-DD HH:MM` format when date differs from parent user message's date; show date separator badge between turns when date changes
+
 **User intervention markers** — MUST be displayed prominently in L2:
 - Left column: scrollable list of user messages with timestamps
 - Each marker is clickable → scrolls to and highlights the corresponding turn in L3
