@@ -66,13 +66,21 @@ Instead, group events into **conversation turns**: each `user` message starts a 
 
 ### Extract user intervention markers (CRITICAL)
 
-Filter turns where the user message is substantive (not empty, not a system skill-load message):
+Filter turns where the user message is substantive. Skip system-generated messages:
 
-- Skip messages starting with "Base directory for this skill" (skill-load stubs)
-- Skip empty messages (these are continuation turns)
-- Keep turns where `user_msg.strip()` has actual content
+**MUST filter out:**
+- Messages matching `<local-command-caveat>...</local-command-caveat>`
+- Messages matching `<command-name>...</command-name>` or `<command-message>...</command-message>`
+- Messages matching `<local-command-stdout>...</local-command-stdout>`
+- "Continue from where you left off." (auto-resume stubs)
+- "Commands are in the form /command [args]" (system help)
+- `/exit` and `Bye!` (session exit)
+- `Base directory for this skill:` (skill-load stubs)
+- Pure whitespace or messages ≤ 3 chars
 
-These user messages become **user intervention markers** — displayed prominently in L2 as clickable timeline markers that jump to the corresponding turn.
+Use regex: filter out messages matching `<[^>]+>` XML tag patterns plus the literal strings above.
+
+**Keep only messages where** `msg.strip()` is non-empty AND passes all filter checks. These become user intervention markers displayed in L2.
 
 ### Classify tools
 
@@ -181,7 +189,10 @@ Embed a `<script>` block using Canvas API (zero dependencies):
 // 2. Bar width = proportional to tool_count / max_tools_in_any_turn
 // 3. Bar color = dominant operation category for that turn
 // 4. User intervention turns get a ★ star marker on the left
-// 5. Click a bar → scroll to and expand the turn detail in L3
+// 5. Click a bar → scroll to and highlight the corresponding block in L3
+//    **CRITICAL: Build a phase_to_block mapping (phase_idx → block_idx)**
+//    because flame chart phase indices and L3 block IDs differ.
+//    Without this mapping, click navigation silently breaks for most bars.
 // 6. Canvas height = turns * (row_height + gap), auto-resize
 ```
 
