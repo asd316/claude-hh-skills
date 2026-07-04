@@ -15,6 +15,7 @@ Two modes, auto-detected by checking if `CLAUDE.md` exists in the project root.
 
 Read these files in parallel:
 - `CLAUDE.md` — project overview, architecture, commands, **rules from repeated mistakes** (if the project has these, they are the highest-priority constraints)
+- `docs/user-profile.md` — **user context** (if exists — WHO you're working with, what they actually want, their fears, hidden knowledge, how past agents went wrong. Read this BEFORE starting any work.)
 - `docs/graph/project-graph.json` — architecture knowledge graph, if exists. Shows goals→pipelines→stages→data flow at skeleton level. Use `/hh:understand` to query or update it.
 - `docs/error-log.md` — known errors and root causes (if exists — read this BEFORE touching any code)
 - `docs/context/error-patterns.md` — error taxonomy by category, detection heuristics (if exists)
@@ -45,7 +46,9 @@ Output a concise summary:
 
 **Known pitfalls:** [from error-log.md if exists — total errors, most recent, most severe category]
 
-**Available skills:** hh:think hh:diagnose hh:experiment hh:visualize hh:schedule hh:undo hh:runbook hh:understand
+**User profile:** [loaded / not found — run `/hh-user-profile-extraction` to create]
+
+**Available skills:** hh:think hh:diagnose hh:experiment hh:visualize hh:schedule hh:undo hh:runbook hh:understand hh-user-profile-extraction
 
 What should we work on?
 ```
@@ -94,6 +97,10 @@ docs/
 # [Project Name]
 
 [One-line purpose.]
+
+## 用户画像
+
+> 详见 `docs/user-profile.md`（如存在）— 用户的真实目标、隐性知识、恐惧、agent 走偏模式。动手前先读。
 
 ## Quick Start
 
@@ -239,7 +246,10 @@ Created:
 - docs/todo/INDEX.md (with 4 priority directories)
 - docs/adr/INDEX.md
 
-**Next:** Run `hh:think` if you have a feature idea, or `hh:runbook` after implementing.
+**Next:**
+- Run `/hh-user-profile-extraction` to establish user context (recommended for complex/multi-session projects)
+- Run `hh:think` if you have a feature idea
+- Run `hh:runbook` after implementing
 ```
 
 ---

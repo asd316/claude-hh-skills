@@ -1,6 +1,7 @@
 ---
 name: hh:runbook
-description: Generate operational documentation and sync conversation insights to project docs. Two modes: (A) quick-start docs for a feature with Run/Stop/Debug/FAQ sections, (B) full doc sync scanning conversation for decisions/knowledge to persist. Use after implementing a feature, when user says "写文档", "怎么用", or wants to sync conversation to docs.
+description: >
+  Generate operational documentation and sync conversation insights to project docs. Two modes: (A) quick-start docs for a feature with Run/Stop/Debug/FAQ sections, (B) full doc sync scanning conversation for decisions/knowledge to persist. Use after implementing a feature, when user says "写文档", "怎么用", or wants to sync conversation to docs.
 ---
 
 # hh:runbook — Documentation & Sync
@@ -136,6 +137,16 @@ After sync is complete, check if the conversation revealed any **constraints or 
 - If user says no → move on
 
 Note: hh-remember does NOT reciprocate (it won't suggest hh-runbook). The dependency is one-way.
+
+### Step 6: Check User Profile freshness
+
+If `docs/user-profile.md` exists, check whether this conversation revealed new information about the user's goals, fears, or hidden knowledge that contradicts or extends the profile. If so:
+
+> 本轮对话中发现了新的用户背景/目标/约束信息。是否更新 `docs/user-profile.md`？
+
+If `docs/user-profile.md` does NOT exist and this was a complex multi-turn session with visible goal drift or repeated corrections:
+
+> 建议运行 `/hh-user-profile-extraction` 来建立用户画像，减少未来 agent 走偏。
 
 ---
 
