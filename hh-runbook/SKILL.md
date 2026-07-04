@@ -1,7 +1,6 @@
 ---
 name: hh-runbook
-description: >
-  Generate operational documentation and sync conversation insights to project docs. Two modes: (A) quick-start docs for a feature with Run/Stop/Debug/FAQ sections, (B) full doc sync scanning conversation for decisions/knowledge to persist. Use after implementing a feature, when user says "写文档", "怎么用", or wants to sync conversation to docs.
+description: Generate operational documentation and sync conversation insights to project docs. Two modes: (A) quick-start docs for a feature with Run/Stop/Debug/FAQ sections, (B) full doc sync scanning conversation for decisions/knowledge to persist. Use after implementing a feature, when user says "写文档", "怎么用", or wants to sync conversation to docs.
 ---
 
 # hh-runbook — Documentation & Sync

@@ -1,7 +1,6 @@
 ---
 name: hh-remember
-description: >
-  Persist constraints and project knowledge across sessions. Primary focus is "DON'T do X" rules and foot-guns. Writes to Constraints.md, .claude/rules/ (auto-loaded by Claude Code), error-log.md, Context.md, and CLAUDE.md. Use when user says "记住", "以后别", "绝对不能", "一定要", "这是个教训", "踩坑了", "remember to never", "always check", "don't forget", when a bug was just fixed and should be logged, or when any non-obvious constraint is discovered that future agents must know. Also use proactively before major changes to recall existing constraints. Note: hh-runbook may suggest running this at the end of its session; this skill does NOT suggest hh-runbook.
+description: Persist constraints and project knowledge across sessions. Primary focus is "DON'T do X" rules and foot-guns. Writes to Constraints.md, .claude/rules/ (auto-loaded by Claude Code), error-log.md, Context.md, and CLAUDE.md. Use when user says "记住", "以后别", "绝对不能", "一定要", "这是个教训", "踩坑了", "remember to never", "always check", "don't forget", when a bug was just fixed and should be logged, or when any non-obvious constraint is discovered that future agents must know. Also use proactively before major changes to recall existing constraints. Note: hh-runbook may suggest running this at the end of its session; this skill does NOT suggest hh-runbook.
 ---
 
 # hh-remember — Cross-Session Project Memory
