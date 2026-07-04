@@ -1,9 +1,11 @@
 ---
-name: hh:understand
+name: hh-understand
 description: Project architecture knowledge graph — understand how intent flows through implementation. Query the graph to trace goals→pipelines→data flow, or init/update the graph from project docs and git history. Use when user asks "这个项目怎么实现的", "数据流怎么走的", "为什么这么设计", or wants to understand project structure without reading all code.
 ---
 
-# hh:understand — Project Architecture Understanding
+# hh-understand — Project Architecture Understanding
+
+> **IDE Environment Note:** Throughout this skill, `CLAUDE.md` refers to the project root instruction file. If running in **Claude Code**, use `CLAUDE.md`. If running in **Cursor / Windsurf / TRAE / other IDEs**, use `AGENTS.md` instead. Detection: if `CLAUDE.md` exists in project root, use it; otherwise fall back to `AGENTS.md`.
 
 Maintain and query a high-level **knowledge graph** of project architecture. This is NOT code-level detail — it captures the skeleton: what the project aims to do, how intent flows through pipelines and stages, what key decisions and constraints shape it.
 
@@ -11,8 +13,8 @@ Graph lives at `docs/graph/project-graph.json`. Query it to understand architect
 
 ## When to Use
 
-- `/hh:understand` (no args) — init the graph (first time) or update it (subsequent)
-- `/hh:understand "how does X work?"` — query the graph to understand a specific part
+- `/hh-understand` (no args) — init the graph (first time) or update it (subsequent)
+- `/hh-understand "how does X work?"` — query the graph to understand a specific part
 - User asks: "这个项目怎么实现的", "数据是怎么流的", "为什么这么设计", "哪里可能有问题"
 
 ## Graph Location
@@ -166,14 +168,14 @@ Create `docs/graph/` directory. Write:
 # Project Knowledge Graph
 
 This directory contains a high-level knowledge graph of the project's architecture.
-It is maintained by `/hh:understand`.
+It is maintained by `/hh-understand`.
 
 - `project-graph.json` — The graph (nodes + edges)
 - `.graph-state.json` — Internal state for incremental updates
 - `README.md` — This file
 
-To update: run `/hh:understand` (no args).
-To query: run `/hh:understand "your question"`.
+To update: run `/hh-understand` (no args).
+To query: run `/hh-understand "your question"`.
 ```
 
 After saving: auto-run **Query Mode** with question "项目整体架构" to generate a reference HTML (`understand-overview-{YYYYMMDD}.html`).
@@ -228,7 +230,7 @@ If no significant changes found: respond with text — "自上次更新以来，
 
 ## Query Mode
 
-**When:** Graph exists. Question provided: `/hh:understand "question"`
+**When:** Graph exists. Question provided: `/hh-understand "question"`
 
 **Goal:** Answer the question by tracing the graph, supplemented by code only when necessary.
 
@@ -337,7 +339,7 @@ CDN is allowed for Mermaid:
 
 ### Rule 6: Clean Minimalist Design (简洁设计)
 
-- Dark theme as default (match project convention from hh:visualize)
+- Dark theme as default (match project convention from hh-visualize)
 - No unnecessary stat cards or decorative elements
 - Max width: 1200px for readability
 - Mermaid diagram should be the visual focus

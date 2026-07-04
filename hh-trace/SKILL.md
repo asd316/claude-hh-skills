@@ -1,15 +1,15 @@
 ---
-name: hh:trace
+name: hh-trace
 description: 从 Claude Code 会话 transcript 生成交互式 HTML 执行追踪报告。以火焰图可视化 tool call、skill 调用、agent spawn。检测卡点（时间间隔、重复调用、慢 agent）。包含 LLM 对执行效能的反思和改进建议。
 ---
 
-# hh:trace — 执行追踪可视化
+# hh-trace — 执行追踪可视化
 
 分析 Claude Code 会话 transcript，生成自包含交互式 HTML 报告，展示执行时间线、tool call 分布和卡点检测。
 
 ## 何时使用
 
-- 用户运行 `/hh:trace` —— 分析当前会话
+- 用户运行 `/hh-trace` —— 分析当前会话
 - 用户说 "trace this session"、"执行追踪"、"看看这次执行怎么样"
 - **Stop hook** —— 会话结束时自动生成报告
 
@@ -35,7 +35,7 @@ ls -t "$TRANSCRIPT_DIR"/*.jsonl 2>/dev/null | head -1
 
 ### 1b：验证 transcript 存在
 
-如果 transcript 为空或尚不存在（会话刚开始就运行 trace），报告："该会话尚无足够的执行记录。等待更多操作后再运行 /hh:trace。"
+如果 transcript 为空或尚不存在（会话刚开始就运行 trace），报告："该会话尚无足够的执行记录。等待更多操作后再运行 /hh-trace。"
 
 ## 阶段 2 —— 解析 Transcript
 
@@ -226,7 +226,7 @@ if current_block: blocks.append(current_block)
 if [ -d "docs/visualization" ]; then
     OUTPUT="docs/visualization/trace/trace-$(date +%Y%m%d-%H%M%S).html"
 else
-    OUTPUT="$HOME/.claude/skills/hh:trace/tmp/trace-$(date +%Y%m%d-%H%M%S).html"
+    OUTPUT="$HOME/.claude/skills/hh-trace/tmp/trace-$(date +%Y%m%d-%H%M%S).html"
 fi
 mkdir -p "$(dirname "$OUTPUT")"
 ```
@@ -441,14 +441,14 @@ activePhases.forEach(p => {
       "matcher": "",
       "hooks": [{
         "type": "command",
-        "command": "echo '[hh:trace] 会话已结束。运行 /hh:trace 查看执行追踪。'"
+        "command": "echo '[hh-trace] 会话已结束。运行 /hh-trace 查看执行追踪。'"
       }]
     }]
   }
 }
 ```
 
-注意：Stop hook 只打印提醒。实际的 trace 生成由用户手动调用 `/hh:trace` 时由 Claude 完成。
+注意：Stop hook 只打印提醒。实际的 trace 生成由用户手动调用 `/hh-trace` 时由 Claude 完成。
 
 ## 边界情况
 

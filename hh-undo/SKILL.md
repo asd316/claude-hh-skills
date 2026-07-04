@@ -1,9 +1,9 @@
 ---
-name: hh:undo
+name: hh-undo
 description: Add batch tracking and rollback to data-modifying pipelines. Records each operation batch with affected items, provides --undo CLI, maintains state auto-recovery. Use when user asks for "回退", "rollback", "undo", or when building any data pipeline that modifies persistent state.
 ---
 
-# hh:undo — Data Pipeline Rollback
+# hh-undo — Data Pipeline Rollback
 
 Every data-modifying operation should be reversible. This skill designs and adds batch tracking + undo capability.
 
@@ -12,7 +12,7 @@ Every data-modifying operation should be reversible. This skill designs and adds
 - User says "支持回退吗", "rollback", "undo", "撤回"
 - Building a new data pipeline that modifies persistent data
 - User expresses anxiety about irreversible operations
-- After `hh:diagnose` finds data corruption — add undo to prevent it happening again
+- After `hh-diagnose` finds data corruption — add undo to prevent it happening again
 
 ## Core Concepts
 

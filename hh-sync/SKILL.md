@@ -1,9 +1,9 @@
 ---
-name: hh:sync
+name: hh-sync
 description: Sync hh-series skills to GitHub and inspect for issues. Auto-detects intent — inspect first, then sync. Use when user says "sync skills", "上传skill", "同步到github", "检查skill", or wants to publish/push hh skills.
 ---
 
-# hh:sync-skills — GitHub Sync & Inspection
+# hh-sync — GitHub Sync & Inspection
 
 Pushes all hh-series skills to `asd316/claude-hh-skills` on GitHub, and runs quality inspections to catch frontmatter issues, broken references, and structural problems.
 
@@ -13,7 +13,7 @@ Pushes all hh-series skills to `asd316/claude-hh-skills` on GitHub, and runs qua
 |------|-------|
 | GitHub | `https://github.com/asd316/claude-hh-skills` |
 | Local clone | `~/.claude/hh-skills-repo/` |
-| Source skills | `~/.claude/skills/hh-*` and `~/.claude/skills/hh:*` |
+| Source skills | `~/.claude/skills/hh-*` |
 | Git identity | `asd316` / `992358904@qq.com` |
 | SSH key | `~/.ssh/id_ed25519_personal` |
 
@@ -41,7 +41,7 @@ Scan all hh skills and produce a structured report. **Never modify files during 
 
 List all skill directories:
 ```bash
-ls -d ~/.claude/skills/hh-* ~/.claude/skills/hh:* 2>/dev/null
+ls -d ~/.claude/skills/hh-* 2>/dev/null
 ```
 
 For each skill directory, check:
@@ -60,10 +60,10 @@ Read the first 10 lines of `SKILL.md`. Verify:
 - No duplicate or malformed YAML keys
 
 #### C2: Name consistency
-The frontmatter `name:` should match the directory name:
-- `hh-sync` directory → `name: hh:sync` (directory uses `-`, name uses `:`)
-- `hh:deploy` directory → `name: hh:deploy` (both use `:`)
-- **Rule:** Replace `-` with `:` in directory name, or keep `:` as-is → should equal frontmatter `name`
+The frontmatter `name:` should exactly match the directory name:
+- `hh-sync` directory → `name: hh-sync`
+- `hh-deploy` directory → `name: hh-deploy`
+- **Rule:** Directory name must equal frontmatter `name` — no transformation needed
 
 #### C3: Local file references
 Scan SKILL.md for markdown links referencing LOCAL files (not http/https):
@@ -72,7 +72,7 @@ Scan SKILL.md for markdown links referencing LOCAL files (not http/https):
 - Flag any broken links
 
 #### C4: Cross-skill references
-If a skill references another hh skill by name (e.g., "Run `hh:diagnose`" or "after `hh:runbook`"), verify that skill directory exists.
+If a skill references another hh skill by name (e.g., "Run `hh-diagnose`" or "after `hh-runbook`"), verify that skill directory exists.
 
 #### C5: Orphan files
 Any file in the skill directory NOT named `SKILL.md` and NOT referenced by SKILL.md is flagged as a potential orphan (WARNING level, not ERROR — it might be intentionally standalone, like `HTML_TEMPLATE.md` which is referenced in documentation text rather than a markdown link).
@@ -96,14 +96,14 @@ Output format:
 | ✅ | hh-schedule | 1 | — |
 | ✅ | hh-undo | 1 | — |
 | ✅ | hh-visualize | 1 | — |
-| ✅ | hh:deploy | 8 | — |
+| ✅ | hh-deploy | 8 | — |
 | ✅ | hh-sync | 1 | — |
 
 ### Issue Details
 
 **Warnings (2):**
 - `hh-think`: `HTML_TEMPLATE.md` exists but has no explicit markdown link from SKILL.md → likely intentional (referenced in prose as `[HTML_TEMPLATE.md](HTML_TEMPLATE.md)`)
-- `hh-onboard`: references `hh:think hh:diagnose hh:experiment hh:visualize hh:schedule hh:undo hh:runbook` → verify these all exist ✅ (all present)
+- `hh-onboard`: references `hh-think hh-diagnose hh-experiment hh-visualize hh-schedule hh-undo hh-runbook` → verify these all exist ✅ (all present)
 
 **Errors (0):**
 None.
@@ -153,7 +153,7 @@ Before syncing, run a lightweight version of Inspect (C1 + C2 only — frontmatt
 export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519_personal -o StrictHostKeyChecking=accept-new"
 
 # Sync each hh skill directory (excluding the sync skill itself from the repo)
-for d in ~/.claude/skills/hh-* ~/.claude/skills/hh:*; do
+for d in ~/.claude/skills/hh-*; do
     skill_name=$(basename "$d")
     rsync -a --delete "$d/" ~/.claude/hh-skills-repo/"$skill_name"/
 done
@@ -203,7 +203,7 @@ git push origin main
 - Pushing without checking inspection results first
 - Forgetting to use the personal SSH key (will fail to auth)
 - Not pulling before pushing (could miss remote changes)
-- Sync-ing `hh:sync-skills` itself — this IS expected, the skill manages itself
+- Sync-ing `hh-sync` itself — this IS expected, the skill manages itself
 
 ---
 
@@ -251,7 +251,7 @@ Run the Sync mode steps (rsync + commit + push).
 - **Remote:** https://github.com/asd316/claude-hh-skills
 - **Skills uploaded:** [list]
 
-**Next:** Skills are now live on GitHub. Use `hh:sync-skills` anytime to sync changes.
+**Next:** Skills are now live on GitHub. Use `hh-sync` anytime to sync changes.
 ```
 
 ---
@@ -297,7 +297,7 @@ To auto-sync on every Claude Code session stop, add this hook to `~/.claude/sett
 │   ├── hh-think/HTML_TEMPLATE.md
 │   ├── hh-undo/SKILL.md
 │   ├── hh-visualize/SKILL.md
-│   └── hh:deploy/
+│   └── hh-deploy/
 │       ├── SKILL.md
 │       └── references/
 │           ├── commands.md

@@ -1,9 +1,9 @@
 ---
-name: hh:experiment
+name: hh-experiment
 description: Prototype in isolation before integrating. Creates self-contained experimental scripts that don't touch working code. Use when user wants to try an approach, test a hypothesis, or compare options without risking the existing codebase.
 ---
 
-# hh:experiment — Isolated Prototyping
+# hh-experiment — Isolated Prototyping
 
 **Rule: never modify working code to test an idea.** Build a standalone prototype first. Integrate only after confirmation.
 
@@ -51,7 +51,7 @@ When user says "集成" or "merge":
 2. Adapt experimental code to match existing patterns (naming, error handling, config)
 3. Add to the correct directory (`src/`, `phase2/`, `phase3_faq/`)
 4. Delete the experimental script (or move to `.save/` if worth keeping)
-5. Run `hh:runbook` to document the new feature
+5. Run hh-runbook to document the new feature
 
 ## Multiple Approaches
 

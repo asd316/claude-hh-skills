@@ -1,5 +1,5 @@
 ---
-name: hh:deploy
+name: hh-deploy
 description: Manage english-dictory Vercel deployments. Routes user intent to the right reference doc for setup, deploy, preview, env vars, troubleshooting, or Git LFS.
 ---
 

@@ -1,9 +1,11 @@
 ---
-name: hh:diagnose
+name: hh-diagnose
 description: Structured diagnostic pipeline for data quality issues. Understand context → audit output → trace root cause (code/prompt/config) → propose fix → apply fix → verify → report. Use when data/output looks wrong, when something that should work doesn't, or when user asks "why is this broken".
 ---
 
-# hh:diagnose — Structured Diagnostic Pipeline
+# hh-diagnose — Structured Diagnostic Pipeline
+
+> **IDE Environment Note:** Throughout this skill, `CLAUDE.md` refers to the project root instruction file. If running in **Claude Code**, use `CLAUDE.md`. If running in **Cursor / Windsurf / TRAE / other IDEs**, use `AGENTS.md` instead. Detection: if `CLAUDE.md` exists in project root, use it; otherwise fall back to `AGENTS.md`.
 
 Six-phase investigation workflow. Never skip phases. Never fix before understanding.
 

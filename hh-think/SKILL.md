@@ -1,9 +1,11 @@
 ---
-name: hh:think
+name: hh-think
 description: Turn vague ideas, doubts, or "something feels off" into structured, visual exploration. Collaborative thinking mode — NOT command execution. Outputs text advice for simple questions, interactive HTML for multi-element relationships. Use when user says "I think...", "Should we...", "Something feels off", "帮我看看这个方案", or any exploratory question.
 ---
 
-# hh:think — Idea Validation & Design Exploration
+# hh-think — Idea Validation & Design Exploration
+
+> **IDE Environment Note:** Throughout this skill, `CLAUDE.md` refers to the project root instruction file. If running in **Claude Code**, use `CLAUDE.md`. If running in **Cursor / Windsurf / TRAE / other IDEs**, use `AGENTS.md` instead. Detection: if `CLAUDE.md` exists in project root, use it; otherwise fall back to `AGENTS.md`.
 
 Turn vague ideas into reviewable, visual artifacts — or concise text advice when the problem is simple.
 

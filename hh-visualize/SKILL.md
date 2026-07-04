@@ -1,9 +1,9 @@
 ---
-name: hh:visualize
+name: hh-visualize
 description: Generate self-contained interactive HTML dashboards for data exploration. Supports tables, filters, toggle switches, charts. Use when user asks for "网页", "可视化", "dashboard", "报表", or any interactive data view.
 ---
 
-# hh:visualize — Interactive HTML Reports
+# hh-visualize — Interactive HTML Reports
 
 Generate single-file, self-contained HTML pages for data exploration. No server, no build step — open in browser directly.
 
@@ -12,7 +12,7 @@ Generate single-file, self-contained HTML pages for data exploration. No server,
 - User asks for "一个网页来展示", "可视化报表", "dashboard"
 - User wants interactive data exploration (filters, toggles, sorting)
 - User says "能看看数据吗" and text isn't enough
-- After running `hh:diagnose` — visualize the before/after comparison
+- After running `hh-diagnose` — visualize the before/after comparison
 
 ## Output Location
 

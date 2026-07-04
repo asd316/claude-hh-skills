@@ -1,10 +1,12 @@
 ---
-name: hh:remember
+name: hh-remember
 description: >
   Persist constraints and project knowledge across sessions. Primary focus is "DON'T do X" rules and foot-guns. Writes to Constraints.md, .claude/rules/ (auto-loaded by Claude Code), error-log.md, Context.md, and CLAUDE.md. Use when user says "记住", "以后别", "绝对不能", "一定要", "这是个教训", "踩坑了", "remember to never", "always check", "don't forget", when a bug was just fixed and should be logged, or when any non-obvious constraint is discovered that future agents must know. Also use proactively before major changes to recall existing constraints. Note: hh-runbook may suggest running this at the end of its session; this skill does NOT suggest hh-runbook.
 ---
 
-# hh:remember — Cross-Session Project Memory
+# hh-remember — Cross-Session Project Memory
+
+> **IDE Environment Note:** Throughout this skill, `CLAUDE.md` refers to the project root instruction file. If running in **Claude Code**, use `CLAUDE.md`. If running in **Cursor / Windsurf / TRAE / other IDEs**, use `AGENTS.md` instead. Detection: if `CLAUDE.md` exists in project root, use it; otherwise fall back to `AGENTS.md`.
 
 Persistent knowledge that survives beyond the current conversation. The agent's job is to capture, categorize, format, and write it to the right file so future sessions benefit from it.
 
@@ -24,7 +26,7 @@ These are the project's long-term memory. They exist in any project (or are crea
 | `docs/Constraints.md` | Hard rules, invariants, gotchas | On-demand (read by agents) | "What must I NOT do?" |
 | `docs/error-log.md` | Bug forensics | On-demand (read by agents) | "What broke before and how was it fixed?" |
 | `docs/Context.md` | Domain knowledge, background | On-demand (read by agents) | "What is this project about?" |
-| `CLAUDE.md` | Agent instructions, architecture | Every session (if present) | "How do I work on this project?" |
+| `CLAUDE.md` (or `AGENTS.md` in non-Claude Code IDEs) | Agent instructions, architecture | Every session (if present) | "How do I work on this project?" |
 
 **Key distinction**:
 - `.claude/rules/` = constraints that are SO critical they must be in context every session (auto-loaded by Claude Code). Use for "绝对不能删除 data/raw", "必须用 conda Python 3.13" level rules.

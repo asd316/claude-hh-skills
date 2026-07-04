@@ -1,10 +1,12 @@
 ---
-name: hh:runbook
+name: hh-runbook
 description: >
   Generate operational documentation and sync conversation insights to project docs. Two modes: (A) quick-start docs for a feature with Run/Stop/Debug/FAQ sections, (B) full doc sync scanning conversation for decisions/knowledge to persist. Use after implementing a feature, when user says "写文档", "怎么用", or wants to sync conversation to docs.
 ---
 
-# hh:runbook — Documentation & Sync
+# hh-runbook — Documentation & Sync
+
+> **IDE Environment Note:** Throughout this skill, `CLAUDE.md` refers to the project root instruction file. If running in **Claude Code**, use `CLAUDE.md`. If running in **Cursor / Windsurf / TRAE / other IDEs**, use `AGENTS.md` instead. Detection: if `CLAUDE.md` exists in project root, use it; otherwise fall back to `AGENTS.md`.
 
 Two modes, auto-detected from context.
 
@@ -68,7 +70,7 @@ Update `docs/quick-start/INDEX.md` with the new entry.
 
 ## Mode B: Full Doc Sync (conversation → docs)
 
-**Trigger:** End of a substantial conversation, user says "同步文档", "sync", or runs `/hh:runbook` with no specific feature.
+**Trigger:** End of a substantial conversation, user says "同步文档", "sync", or runs `/hh-runbook` with no specific feature.
 
 ### Step 1: Scan Existing Docs
 
@@ -85,7 +87,7 @@ Identify items with long-term value (ignore debugging detours, temporary fixes, 
 - **Pitfalls & edge cases**: non-obvious constraints, foot-guns discovered
 - **Errors discovered & fixed**: new error patterns with root cause + fix → MUST update `docs/error-log.md`
 - **Project guidance**: new commands, tech stack changes, architecture shifts → `CLAUDE.md`
-- **Graph impact**: if project skeleton changed (new phase, new pipeline, new constraint) → suggest running `/hh:understand` to update the knowledge graph
+- **Graph impact**: if project skeleton changed (new phase, new pipeline, new constraint) → suggest running `/hh-understand` to update the knowledge graph
 
 If nothing worth persisting, say so and stop.
 
@@ -115,7 +117,7 @@ If nothing worth persisting, say so and stop.
 - Project-level index/status/command changes → update `CLAUDE.md`
 - New error discovered → update `docs/error-log.md`
 - Created a new doc → add an index entry in `CLAUDE.md`
-- Architecture/pipeline/stage change → suggest running `/hh:understand` to update `docs/graph/project-graph.json`
+- Architecture/pipeline/stage change → suggest running `/hh-understand` to update `docs/graph/project-graph.json`
 
 ### Step 4: Execute After Confirmation
 
