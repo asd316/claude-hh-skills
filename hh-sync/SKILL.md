@@ -12,8 +12,8 @@ Pushes all hh-series skills to `asd316/claude-hh-skills` on GitHub, and runs qua
 | Item | Value |
 |------|-------|
 | GitHub | `https://github.com/asd316/claude-hh-skills` |
-| Local clone | `~/.claude/hh-skills-repo/` |
-| Source skills | `~/.claude/skills/hh-*` |
+| Local clone | `~/.skills-manager/repos/claude-hh-skills/` |
+| Source skills | `~/.skills-manager/skills/hh-*` |
 | Git identity | `asd316` / `992358904@qq.com` |
 | SSH key | `~/.ssh/id_ed25519_personal` |
 
@@ -29,7 +29,7 @@ Read the user's message and pick ONE mode:
 
 **Default (no clear keyword):** Run Inspect first, then offer to Sync if there are changes to push.
 
-**If the local repo `~/.claude/hh-skills-repo/` does not exist**, redirect to Setup first regardless of keywords.
+**If the local repo `~/.skills-manager/repos/claude-hh-skills/` does not exist**, redirect to Setup first regardless of keywords.
 
 ---
 
@@ -41,7 +41,7 @@ Scan all hh skills and produce a structured report. **Never modify files during 
 
 List all skill directories:
 ```bash
-ls -d ~/.claude/skills/hh-* 2>/dev/null
+ls -d ~/.skills-manager/skills/hh-* 2>/dev/null
 ```
 
 For each skill directory, check:
@@ -129,13 +129,13 @@ None.
 
 ## 🔵 Mode: Sync (Upload)
 
-Copy all hh skills from `~/.claude/skills/` to the local repo and push to GitHub.
+Copy all hh skills from `~/.skills-manager/skills/` to the local repo and push to GitHub.
 
 ### Prerequisites check
 
 ```bash
 # Verify repo exists
-test -d ~/.claude/hh-skills-repo/.git || echo "REPO_MISSING"
+test -d ~/.skills-manager/repos/claude-hh-skills/.git || echo "REPO_MISSING"
 
 # Verify SSH key exists
 test -f ~/.ssh/id_ed25519_personal || echo "SSH_KEY_MISSING"
@@ -153,9 +153,9 @@ Before syncing, run a lightweight version of Inspect (C1 + C2 only — frontmatt
 export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519_personal -o StrictHostKeyChecking=accept-new"
 
 # Sync each hh skill directory (excluding the sync skill itself from the repo)
-for d in ~/.claude/skills/hh-*; do
+for d in ~/.skills-manager/skills/hh-*; do
     skill_name=$(basename "$d")
-    rsync -a --delete "$d/" ~/.claude/hh-skills-repo/"$skill_name"/
+    rsync -a --delete "$d/" ~/.skills-manager/repos/claude-hh-skills/"$skill_name"/
 done
 ```
 
@@ -164,7 +164,7 @@ done
 ### Step 3: Detect changes
 
 ```bash
-cd ~/.claude/hh-skills-repo
+cd ~/.skills-manager/repos/claude-hh-skills
 git status --porcelain
 ```
 
@@ -174,7 +174,7 @@ If no changes → "✅ All skills up to date. Nothing to push."
 
 If there are changes:
 ```bash
-cd ~/.claude/hh-skills-repo
+cd ~/.skills-manager/repos/claude-hh-skills
 git add -A
 git diff --cached --stat   # Show summary to user
 git commit -m "sync: update hh skills — $(date +%Y-%m-%d)"
@@ -227,12 +227,12 @@ which git && echo "GIT_OK"
 export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519_personal -o StrictHostKeyChecking=accept-new"
 
 # Remove any existing broken directory
-rm -rf ~/.claude/hh-skills-repo
+rm -rf ~/.skills-manager/repos/claude-hh-skills
 
 # Clone
-git clone git@github.com:asd316/claude-hh-skills.git ~/.claude/hh-skills-repo
+git clone git@github.com:asd316/claude-hh-skills.git ~/.skills-manager/repos/claude-hh-skills
 
-cd ~/.claude/hh-skills-repo
+cd ~/.skills-manager/repos/claude-hh-skills
 git config user.name "asd316"
 git config user.email "992358904@qq.com"
 git config --local url."git@github.com:".insteadOf https://github.com/
@@ -247,7 +247,7 @@ Run the Sync mode steps (rsync + commit + push).
 ```
 ## 🆕 Setup Complete
 
-- **Repo:** ~/.claude/hh-skills-repo/
+- **Repo:** ~/.skills-manager/repos/claude-hh-skills/
 - **Remote:** https://github.com/asd316/claude-hh-skills
 - **Skills uploaded:** [list]
 
@@ -269,7 +269,7 @@ To auto-sync on every Claude Code session stop, add this hook to `~/.claude/sett
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'export GIT_SSH_COMMAND=\"ssh -i ~/.ssh/id_ed25519_personal\"; cd ~/.claude/hh-skills-repo && rsync -a --delete ~/.claude/skills/hh-*/ . /tmp/hh-skills-sync; git add -A && git diff --cached --quiet || git commit -m \"auto-sync: $(date +%Y-%m-%d)\" && git push origin main'"
+            "command": "bash -c 'export GIT_SSH_COMMAND=\"ssh -i ~/.ssh/id_ed25519_personal\"; cd ~/.skills-manager/repos/claude-hh-skills && rsync -a --delete ~/.skills-manager/skills/hh-*/ . /tmp/hh-skills-sync; git add -A && git diff --cached --quiet || git commit -m \"auto-sync: $(date +%Y-%m-%d)\" && git push origin main'"
           }
         ]
       }
@@ -285,7 +285,7 @@ To auto-sync on every Claude Code session stop, add this hook to `~/.claude/sett
 ## File Structure Reference
 
 ```
-~/.claude/
+~/.skills-manager/
 ├── skills/                     ← Active skills (source of truth)
 │   ├── hh-diagnose/SKILL.md
 │   ├── hh-experiment/SKILL.md
@@ -307,6 +307,6 @@ To auto-sync on every Claude Code session stop, add this hook to `~/.claude/sett
 │           ├── preview.md
 │           ├── setup.md
 │           └── troubleshoot.md
-└── hh-skills-repo/             ← Git working copy (synced to GitHub)
+└── repos/claude-hh-skills/     ← Git working copy (synced to GitHub)
     └── (mirrors skills/ structure)
 ```

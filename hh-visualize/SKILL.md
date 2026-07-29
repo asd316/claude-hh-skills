@@ -19,6 +19,44 @@ Generate single-file, self-contained HTML pages for data exploration. No server,
 All reports go to `docs/visualization/report-{topic}-{YYYYMMDD}.html`.
 After generation, auto-open with `open <file>`.
 
+## Cloud Deployment (Remote Access)
+
+All reports should ALSO be deployed to Cloudflare Pages so the user can access them from any device (phone, remote computer).
+
+### Deploy Decision
+
+**Default: always deploy to cloud.** It costs virtually nothing (free plan: unlimited bandwidth, unlimited requests, 500 deploys/month, HTML files are only ~KB each).
+
+No need to detect whether the user is on their Mac Mini or a remote device — just deploy every time.
+
+### How to Deploy
+
+After generating and saving the HTML file:
+
+```bash
+# 1. Copy the latest report to the deploy directory
+cp docs/visualization/report-{topic}-{YYYYMMDD}.html /tmp/cloudflare-deploy/index.html
+
+# 2. Deploy to Cloudflare Pages (production)
+npx wrangler pages deploy /tmp/cloudflare-deploy --project-name my-html-reports --branch main
+```
+
+### Environment Variables (already configured in ~/.zshrc)
+
+```
+CLOUDFLARE_API_TOKEN  — API token with Pages read/write permission
+CLOUDFLARE_ACCOUNT_ID — 3406f783194fbb3f35058ffe8dbc8a52
+```
+
+### Return Both Links
+
+After deploy, tell the user:
+- Local: `computer:///Users/admin/.../report-{topic}-{YYYYMMDD}.html`
+- Cloud: `https://my-html-reports.pages.dev`
+
+All reports go to `docs/visualization/report-{topic}-{YYYYMMDD}.html`.
+After generation, auto-open with `open <file>`.
+
 ## Information Architecture (MANDATORY)
 
 The #1 failure mode: **dumping all data onto the page with no hierarchy.** Users open the page, see a wall of numbers and tables, can't find the point, and give up.
