@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Notification Sounds"
+  short_description: "Repair assistant lifecycle sound notifications safely."
+  default_prompt: "Use $agent-notification-sounds to diagnose and restore approval and completion sounds for an AI assistant."
